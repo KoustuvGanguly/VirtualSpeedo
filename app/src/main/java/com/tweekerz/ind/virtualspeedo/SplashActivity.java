@@ -33,6 +33,7 @@ public class SplashActivity extends AppCompatActivity {
                 @Override
                 public void onTick(long l) {
                     try {
+                        //test
                         if ((4000 - l) <= 2000) {
                             speedView.speedTo(speedView.getSpeed() + 10);
                         } else {
