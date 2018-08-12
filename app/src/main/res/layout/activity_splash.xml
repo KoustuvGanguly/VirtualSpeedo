@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:background="#000"
+    android:layout_height="match_parent"
+    tools:context="com.tweekerz.ind.virtualspeedo.SplashActivity">
+    <com.github.anastr.speedviewlib.SpeedView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/speed_tv_spl"
+        android:layout_centerInParent="true"
+        app:sv_textSize="25dp"
+        app:sv_backgroundCircleColor="#000"
+        app:sv_centerCircleColor="#73f"
+        app:sv_indicatorColor="#00ff00"
+        app:sv_lowSpeedColor="#00af00"
+        app:sv_mediumSpeedColor="#f0af00"
+        app:sv_highSpeedColor="#af0000"
+        app:sv_speedometerMode="NORMAL"
+        app:sv_unitTextColor="#0ff"
+        app:sv_speedTextColor="#00ff00"
+        app:sv_markColor="#0ff"
+        app:sv_textColor="#00ff00"
+        app:sv_maxSpeed="300"
+        app:sv_speedTextSize="23dp"
+        app:sv_tickNumber="6"
+        app:sv_unitTextSize="21dp"
+        app:sv_unitUnderSpeedText="true"
+        app:sv_unitSpeedInterval="5dp"
+        android:gravity="center"/>
+<TextView
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_below="@+id/speed_tv_spl"
+    android:textColor="#FFF"
+    android:text="Virtual \n Speedometer"
+    android:gravity="center"
+    android:textSize="28dp"
+    android:layout_centerInParent="true"/>
+</RelativeLayout>

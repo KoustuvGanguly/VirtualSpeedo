@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/rl1"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="5dp"
+    android:background="#000"
+    tools:context="com.tweekerz.ind.virtualspeedo.Act1">
+
+    <TextView
+        android:id="@+id/pp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="5dp"
+        android:gravity="left"
+        android:text="Privacy Policy"
+        android:textColor="#fff"
+        android:textSize="18dp" />
+<TextView
+    android:textColor="#00ff00"
+    android:padding="5dp"
+    android:textSize="18dp"
+    android:layout_toLeftOf="@+id/tgl_switch"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="Analog/Digital"/>
+    <android.support.v7.widget.SwitchCompat
+        android:id="@+id/tgl_switch"
+        android:padding="5dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:textSize="18dp"
+        app:thumbTint="#0ff"
+        app:trackTint="#73f" />
+
+    <TextView
+        android:id="@+id/altitude"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/pp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="5dp"
+        android:layout_marginTop="5dp"
+        android:gravity="center"
+        android:text="0"
+        android:textColor="#fff"
+        android:textSize="25sp"
+        android:textStyle="bold"
+        android:visibility="visible" />
+
+    <LinearLayout
+        android:id="@+id/center_lyt"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/speed_digital_tv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="0.0"
+            android:textColor="#00ff00"
+            android:textSize="120sp"
+            android:visibility="gone" />
+        <TextView
+            android:id="@+id/km"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="km/h"
+            android:textColor="#00ff00"
+            android:textSize="40sp"
+            android:visibility="gone" />
+
+        <com.github.anastr.speedviewlib.SpeedView
+            android:id="@+id/speed_tv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:visibility="visible"
+            app:sv_backgroundCircleColor="#000"
+            app:sv_centerCircleColor="#73f"
+            app:sv_highSpeedColor="#af0000"
+            app:sv_indicatorColor="#00ff00"
+            app:sv_lowSpeedColor="#00af00"
+            app:sv_markColor="#0ff"
+            app:sv_maxSpeed="300"
+            app:sv_mediumSpeedColor="#f0af00"
+            app:sv_speedTextColor="#00ff00"
+            app:sv_speedTextSize="23dp"
+            app:sv_speedometerMode="NORMAL"
+            app:sv_textColor="#00ff00"
+            app:sv_textSize="25dp"
+            app:sv_tickNumber="6"
+            app:sv_unitSpeedInterval="5dp"
+            app:sv_unitTextColor="#0ff"
+            app:sv_unitTextSize="21dp"
+            app:sv_unitUnderSpeedText="true" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/top_speed_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/last_top_speed_time"
+        android:layout_centerInParent="true"
+        android:layout_marginTop="10dp"
+        android:gravity="center"
+        android:text="0"
+        android:textColor="#D4AF37"
+        android:textSize="25sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/last_top_speed_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerInParent="true"
+        android:text="01-01-1970 05:30:00"
+        android:textColor="#fff"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+</RelativeLayout>
