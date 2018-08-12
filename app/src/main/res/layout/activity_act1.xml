@@ -5,7 +5,7 @@
     android:id="@+id/rl1"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="5dp"
+    android:paddingTop="5dp"
     android:background="#000"
     tools:context="com.tweekerz.ind.virtualspeedo.Act1">
 
@@ -121,13 +121,22 @@
         android:textStyle="bold" />
 
     <TextView
+        android:layout_above="@+id/adView"
         android:id="@+id/last_top_speed_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
         android:layout_centerInParent="true"
         android:text="01-01-1970 05:30:00"
         android:textColor="#fff"
         android:textSize="20sp"
         android:textStyle="bold" />
+    <com.google.android.gms.ads.AdView
+        xmlns:ads="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/adView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        ads:adSize="SMART_BANNER"
+        ads:adUnitId="ca-app-pub-3925957206744972/5904204585"/>
 </RelativeLayout>

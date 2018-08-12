@@ -27,6 +27,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.anastr.speedviewlib.SpeedView;
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -58,6 +62,7 @@ public class Act1 extends AppCompatActivity implements
     private double mCurAlt;
     private NotificationCompat.Builder mBuilder;
     private NotificationManagerCompat notificationManager;
+    private AdView mAdView;
 
 
     @SuppressLint("MissingPermission")
@@ -131,11 +136,38 @@ public class Act1 extends AppCompatActivity implements
                 }
             });
             tgl_switch.setChecked(mSharedPreferences.getBoolean("switch_state", false));
-//            progressiveGauge.setDe
+            MobileAds.initialize(this, "ca-app-pub-3925957206744972~8869279275");
+            mAdView = (AdView) findViewById(R.id.adView);
+            AdRequest adRequest = new AdRequest.Builder().build();
+            mAdView.loadAd(adRequest);
+            mAdView.setAdListener(new AdListener() {
+                @Override
+                public void onAdLoaded() {
+                }
 
+                @Override
+                public void onAdFailedToLoad(int errorCode) {
+                    // Code to be executed when an ad request fails.
+                }
 
-// change speed to 50 Km/h
-            // progressiveGauge.speedTo(50);
+                @Override
+                public void onAdOpened() {
+                    // Code to be executed when an ad opens an overlay that
+                    // covers the screen.
+                }
+
+                @Override
+                public void onAdLeftApplication() {
+                    // Code to be executed when the user has left the app.
+                }
+
+                @Override
+                public void onAdClosed() {
+                    // Code to be executed when when the user is about to return
+                    // to the app after tapping on an ad.
+                }
+            });
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -195,7 +227,7 @@ public class Act1 extends AppCompatActivity implements
                     public void run() {
                         try {
                             mBuilder.setCategory(NotificationCompat.CATEGORY_STATUS);
-                            mBuilder.setProgress(speedView.getMaxSpeed(), (int) speedView.getSpeed(), false);
+                            mBuilder.setProgress((int) speedView.getMaxSpeed(), (int) speedView.getSpeed(), false);
                             mBuilder.setStyle(new NotificationCompat.BigTextStyle());
                             mBuilder.setColorized(true);
                             mBuilder.setContentText("Altitude " + mCurAlt + " m");
@@ -233,7 +265,7 @@ public class Act1 extends AppCompatActivity implements
                         public void run() {
                             try {
                                 mBuilder.setCategory(NotificationCompat.CATEGORY_STATUS);
-                                mBuilder.setProgress(speedView.getMaxSpeed(), (int) speedView.getSpeed(), false);
+                                mBuilder.setProgress((int) speedView.getMaxSpeed(), (int) speedView.getSpeed(), false);
                                 mBuilder.setStyle(new NotificationCompat.BigTextStyle());
                                 mBuilder.setColorized(true);
                                 mBuilder.setContentText("Altitude " + mCurAlt + " m");
