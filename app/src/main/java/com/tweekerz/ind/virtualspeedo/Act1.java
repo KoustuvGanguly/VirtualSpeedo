@@ -21,8 +21,8 @@ import android.support.v7.widget.SwitchCompat;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.CompoundButton;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,7 +30,11 @@ import com.github.anastr.speedviewlib.SpeedView;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.reward.RewardItem;
+import com.google.android.gms.ads.reward.RewardedVideoAd;
+import com.google.android.gms.ads.reward.RewardedVideoAdListener;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -55,14 +59,18 @@ public class Act1 extends AppCompatActivity implements
     private TextView mTopSpd, mAltitude, mLast_top_speed_time;
     private SharedPreferences mSharedPreferences;
     private SpeedView speedView;
-    private TextView mDigitalSpeedView,km;
+    private TextView mDigitalSpeedView, km;
     private SwitchCompat tgl_switch;
+    private boolean isTglEnabled = false;
+    private Button rwrd_btn;
     private GoogleApiClient googleApiClient;
     private Context mContext;
     private double mCurAlt;
     private NotificationCompat.Builder mBuilder;
     private NotificationManagerCompat notificationManager;
     private AdView mAdView;
+    private InterstitialAd mInterstitialAd;
+    private RewardedVideoAd mRewardedVideoAd;
 
 
     @SuppressLint("MissingPermission")
@@ -86,6 +94,7 @@ public class Act1 extends AppCompatActivity implements
                 }
             });
             mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+            rwrd_btn = findViewById(R.id.rwrd_btn);
             mTopSpd = (TextView) findViewById(R.id.top_speed_tv);
             mAltitude = (TextView) findViewById(R.id.altitude);
             mLast_top_speed_time = (TextView) findViewById(R.id.last_top_speed_time);
@@ -106,6 +115,12 @@ public class Act1 extends AppCompatActivity implements
             mTopSpd.setText("Top speed : " + convertMPStoKMPH(mSharedPreferences.getFloat("top_spd", 0)) + "km/h");
             // mAltitude.setText("Limit crossed : " + String.valueOf(mSharedPreferences.getLong("spd_limit_crossed_times", 0)) + " times!");
             tgl_switch = findViewById(R.id.tgl_switch);
+            tgl_switch.setEnabled(isTglEnabled);
+            if (!isTglEnabled) {
+                ((TextView) findViewById(R.id.lbl1)).setTextColor(Color.GRAY);
+            } else {
+                ((TextView) findViewById(R.id.lbl1)).setTextColor(Color.GREEN);
+            }
             mDigitalSpeedView = findViewById(R.id.speed_digital_tv);
             km = findViewById(R.id.km);
             speedView = (SpeedView) findViewById(R.id.speed_tv);
@@ -122,24 +137,42 @@ public class Act1 extends AppCompatActivity implements
             tgl_switch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                    if (b) {
-                        mSharedPreferences.edit().putBoolean("switch_state", true).apply();
-                        speedView.setVisibility(View.GONE);
-                        mDigitalSpeedView.setVisibility(View.VISIBLE);
-                        km.setVisibility(View.VISIBLE);
-                    } else {
-                        mSharedPreferences.edit().putBoolean("switch_state", false).apply();
-                        speedView.setVisibility(View.VISIBLE);
-                        mDigitalSpeedView.setVisibility(View.GONE);
-                        km.setVisibility(View.GONE);
+                    try {
+                        if (b) {
+                            mSharedPreferences.edit().putBoolean("switch_state", true).apply();
+                            speedView.setVisibility(View.GONE);
+                            mDigitalSpeedView.setVisibility(View.VISIBLE);
+                            km.setVisibility(View.VISIBLE);
+                        } else {
+                            mSharedPreferences.edit().putBoolean("switch_state", false).apply();
+                            speedView.setVisibility(View.VISIBLE);
+                            mDigitalSpeedView.setVisibility(View.GONE);
+                            km.setVisibility(View.GONE);
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
                 }
             });
-            tgl_switch.setChecked(mSharedPreferences.getBoolean("switch_state", false));
+//            tgl_switch.setChecked(mSharedPreferences.getBoolean("switch_state", false));
+            rwrd_btn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    try {
+                        if (mRewardedVideoAd.isLoaded()) {
+                            mRewardedVideoAd.show();
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
             MobileAds.initialize(this, "ca-app-pub-3925957206744972~8869279275");
             mAdView = (AdView) findViewById(R.id.adView);
-            AdRequest adRequest = new AdRequest.Builder().build();
-            mAdView.loadAd(adRequest);
+            mInterstitialAd = new InterstitialAd(this);
+            mInterstitialAd.setAdUnitId("ca-app-pub-3925957206744972/8325155655");
+            mInterstitialAd.loadAd(buildAd());
+            mAdView.loadAd(buildAd());
             mAdView.setAdListener(new AdListener() {
                 @Override
                 public void onAdLoaded() {
@@ -158,19 +191,101 @@ public class Act1 extends AppCompatActivity implements
 
                 @Override
                 public void onAdLeftApplication() {
-                    // Code to be executed when the user has left the app.
                 }
 
                 @Override
                 public void onAdClosed() {
-                    // Code to be executed when when the user is about to return
-                    // to the app after tapping on an ad.
                 }
             });
 
+            mInterstitialAd.setAdListener(new AdListener() {
+                @Override
+                public void onAdClosed() {
+                    try {
+                        super.onAdClosed();
+                        mInterstitialAd.loadAd(buildAd());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                @Override
+                public void onAdLeftApplication() {
+                    try {
+                        super.onAdLeftApplication();
+                        mInterstitialAd.loadAd(buildAd());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+            mRewardedVideoAd = MobileAds.getRewardedVideoAdInstance(this);
+            mRewardedVideoAd.setRewardedVideoAdListener(new RewardedVideoAdListener() {
+                @Override
+                public void onRewardedVideoAdLoaded() {
+                    try {
+                        rwrd_btn.setEnabled(true);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                @Override
+                public void onRewardedVideoAdOpened() {
+
+                }
+
+                @Override
+                public void onRewardedVideoStarted() {
+
+                }
+
+                @Override
+                public void onRewardedVideoAdClosed() {
+                    loadRewardedVideoAd();
+                }
+
+                @Override
+                public void onRewarded(RewardItem rewardItem) {
+                    try {
+                        isTglEnabled = true;
+                        tgl_switch.setEnabled(isTglEnabled);
+                        rwrd_btn.setVisibility(View.GONE);
+                        ((TextView) findViewById(R.id.lbl1)).setTextColor(Color.GREEN);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                @Override
+                public void onRewardedVideoAdLeftApplication() {
+
+                }
+
+                @Override
+                public void onRewardedVideoAdFailedToLoad(int i) {
+                    loadRewardedVideoAd();
+                }
+
+                @Override
+                public void onRewardedVideoCompleted() {
+
+                }
+            });
+
+            loadRewardedVideoAd();
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private void loadRewardedVideoAd() {
+        mRewardedVideoAd.loadAd("ca-app-pub-3925957206744972/4329645292",
+                new AdRequest.Builder()/*.addTestDevice("5B92262A66C191C28146198B35A220B3")*/.build());
+    }
+
+    private AdRequest buildAd() {
+        return new AdRequest.Builder()/*.addTestDevice("5B92262A66C191C28146198B35A220B3")*/.build();
     }
 
     private String getTime(long time) {
@@ -351,6 +466,7 @@ public class Act1 extends AppCompatActivity implements
             //speedView.stop();
             mTopSpd.setText("Top speed : " + convertMPStoKMPH(mSharedPreferences.getFloat("top_spd", 0)) + "km/h");
             mLast_top_speed_time.setText("Reached on : " + getTime(mSharedPreferences.getLong("top_speed_last_time", 0)));
+            showAd();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -371,7 +487,13 @@ public class Act1 extends AppCompatActivity implements
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        finish();
+        showAd();
+    }
+
+    private void showAd() {
+        if (mInterstitialAd.isLoaded()) {
+            mInterstitialAd.show();
+        }
     }
 
     @Override
@@ -397,6 +519,7 @@ public class Act1 extends AppCompatActivity implements
             if (mLocationManager.getProvider(LocationManager.GPS_PROVIDER) != null) {
                 mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 1, Act1.this);
             }
+            showAd();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -405,11 +528,6 @@ public class Act1 extends AppCompatActivity implements
     @Override
     protected void onPause() {
         super.onPause();
-        try {
-            // mLocationManager.removeUpdates(this);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     private void enableLoc() {

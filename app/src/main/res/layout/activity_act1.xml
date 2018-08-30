@@ -19,7 +19,21 @@
         android:text="Privacy Policy"
         android:textColor="#fff"
         android:textSize="18dp" />
+    <Button
+        android:background="#00f"
+        android:textColor="#fff"
+        android:layout_marginTop="2dp"
+        android:gravity="center"
+        android:text="Unlock digital speedometer for this session"
+        android:textSize="10dp"
+        android:enabled="false"
+        android:layout_below="@+id/lbl1"
+        android:layout_alignParentRight="true"
+        android:id="@+id/rwrd_btn"
+        android:layout_width="match_parent"
+        android:layout_height="20dp" />
 <TextView
+    android:id="@+id/lbl1"
     android:textColor="#00ff00"
     android:padding="5dp"
     android:textSize="18dp"
@@ -36,6 +50,7 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
         android:textSize="18dp"
+        android:enabled="false"
         app:thumbTint="#0ff"
         app:trackTint="#73f" />
 
@@ -45,8 +60,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/pp"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="5dp"
-        android:layout_marginTop="5dp"
+        android:layout_marginTop="25dp"
         android:gravity="center"
         android:text="0"
         android:textColor="#fff"
