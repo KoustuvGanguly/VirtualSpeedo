@@ -29,7 +29,7 @@ public class SplashActivity extends AppCompatActivity {
             speedView.setMaxSpeed(300);
             speedView.setWithTremble(false);
             speedView.speedTo(1);
-            new CountDownTimer(4000, 20) {
+            new CountDownTimer(4000, 10) {
                 @Override
                 public void onTick(long l) {
                     try {
