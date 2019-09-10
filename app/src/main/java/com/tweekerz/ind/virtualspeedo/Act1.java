@@ -60,8 +60,8 @@ public class Act1 extends AppCompatActivity implements
     private SharedPreferences mSharedPreferences;
     private SpeedView speedView;
     private TextView mDigitalSpeedView, km;
-    private SwitchCompat tgl_switch;
-    private boolean isTglEnabled = false;
+    private SwitchCompat tgl_switch, tgl_switch_unit;
+    private boolean isTglEnabled = true, isUnitKMPH = true;
     private Button rwrd_btn;
     private GoogleApiClient googleApiClient;
     private Context mContext;
@@ -112,9 +112,11 @@ public class Act1 extends AppCompatActivity implements
             }
             mAltitude.setText("Altitude : Searching...");
             mLast_top_speed_time.setText("Reached on : " + getTime(mSharedPreferences.getLong("top_speed_last_time", 0)));
-            mTopSpd.setText("Top speed : " + convertMPStoKMPH(mSharedPreferences.getFloat("top_spd", 0)) + "km/h");
+            mTopSpd.setText("Top speed : " + convertMPStoKMPHOrMPH(mSharedPreferences.getFloat("top_spd", 0))
+                    + (isUnitKMPH?"km/h":"MPH"));
             // mAltitude.setText("Limit crossed : " + String.valueOf(mSharedPreferences.getLong("spd_limit_crossed_times", 0)) + " times!");
             tgl_switch = findViewById(R.id.tgl_switch);
+            tgl_switch_unit = findViewById(R.id.tgl_switch_unit);
             tgl_switch.setEnabled(isTglEnabled);
             if (!isTglEnabled) {
                 ((TextView) findViewById(R.id.lbl1)).setTextColor(Color.GRAY);
@@ -154,7 +156,24 @@ public class Act1 extends AppCompatActivity implements
                     }
                 }
             });
-//            tgl_switch.setChecked(mSharedPreferences.getBoolean("switch_state", false));
+
+            tgl_switch_unit.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                    try {
+                        isUnitKMPH = !b;
+                        mSharedPreferences.edit().putBoolean("unit_kmph", !b).apply();
+                        speedView.setUnit(b ? "MPH" : "Km/h");
+                        km.setText(b ? "MPH" : "Km/h");
+                        mTopSpd.setText("Top speed : " + convertMPStoKMPHOrMPH(mSharedPreferences.getFloat("top_spd", 0))
+                                + (isUnitKMPH?"km/h":"MPH"));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+            tgl_switch.setChecked(mSharedPreferences.getBoolean("switch_state", false));
+            tgl_switch_unit.setChecked(!mSharedPreferences.getBoolean("unit_kmph", true));
             rwrd_btn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -224,7 +243,7 @@ public class Act1 extends AppCompatActivity implements
                 @Override
                 public void onRewardedVideoAdLoaded() {
                     try {
-                        rwrd_btn.setEnabled(true);
+//                        rwrd_btn.setEnabled(true);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -248,8 +267,8 @@ public class Act1 extends AppCompatActivity implements
                 @Override
                 public void onRewarded(RewardItem rewardItem) {
                     try {
-                        isTglEnabled = true;
-                        tgl_switch.setEnabled(isTglEnabled);
+//                        isTglEnabled = true;
+//                        tgl_switch.setEnabled(isTglEnabled);
                         rwrd_btn.setVisibility(View.GONE);
                         ((TextView) findViewById(R.id.lbl1)).setTextColor(Color.GREEN);
                     } catch (Exception e) {
@@ -308,10 +327,10 @@ public class Act1 extends AppCompatActivity implements
                 mAltitude.setText("Alt : " + alt + " meters");
             }
             if (location.hasSpeed()) {
-                if (convertMPStoKMPH(location.getSpeed()) >= speedView.getMaxSpeed()) {
+                if (convertMPStoKMPHOrMPH(location.getSpeed()) >= speedView.getMaxSpeed()) {
                     speedView.setMaxSpeed(speedView.getMaxSpeed() + speedView.getMaxSpeed() / 2);
                 }
-                float tempSpd = (float) convertMPStoKMPH(location.getSpeed());
+                float tempSpd = (float) convertMPStoKMPHOrMPH(location.getSpeed());
                 float mCurSpd = tempSpd >= 1 ? tempSpd : 0;
                 if (speedView.isInLowSection()) {
                     mDigitalSpeedView.setTextColor(Color.GREEN);
@@ -359,11 +378,11 @@ public class Act1 extends AppCompatActivity implements
                 if (location.getSpeed() > mSharedPreferences.getFloat("top_spd", 0)) {
                     mSharedPreferences.edit().putFloat("top_spd", location.getSpeed()).apply();
                     mSharedPreferences.edit().putLong("top_speed_last_time", System.currentTimeMillis()).apply();
-                    mTopSpd.setText("Top speed : " + convertMPStoKMPH(location.getSpeed()) + "km/h");
+                    mTopSpd.setText("Top speed : " + convertMPStoKMPHOrMPH(location.getSpeed()) + (isUnitKMPH?"km/h":"MPH"));
                     mLast_top_speed_time.setText("Reached on : " + getTime(mSharedPreferences.getLong("top_speed_last_time", 0)));
                 } else {
 
-                    mTopSpd.setText("Top speed : " + convertMPStoKMPH(mSharedPreferences.getFloat("top_spd", 0)) + "km/h");
+                    mTopSpd.setText("Top speed : " + convertMPStoKMPHOrMPH(mSharedPreferences.getFloat("top_spd", 0)) + (isUnitKMPH?"km/h":"MPH"));
                     mLast_top_speed_time.setText("Reached on : " + getTime(mSharedPreferences.getLong("top_speed_last_time", 0)));
                 }
             } else {
@@ -394,7 +413,7 @@ public class Act1 extends AppCompatActivity implements
                         }
                     });
                     // speedView.stop();
-                    mTopSpd.setText("Top speed : " + convertMPStoKMPH(mSharedPreferences.getFloat("top_spd", 0)) + "km/h");
+                    mTopSpd.setText("Top speed : " + convertMPStoKMPHOrMPH(mSharedPreferences.getFloat("top_spd", 0)) + (isUnitKMPH?"km/h":"MPH"));
                     mLast_top_speed_time.setText("Reached on : " + getTime(mSharedPreferences.getLong("top_speed_last_time", 0)));
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -405,9 +424,9 @@ public class Act1 extends AppCompatActivity implements
         }
     }
 
-    private double convertMPStoKMPH(float mps) {
+    private double convertMPStoKMPHOrMPH(float mps) {
         try {
-            BigDecimal bd = new BigDecimal((mps * 3600) / 1000);
+            BigDecimal bd = new BigDecimal((mps * 3600) / (isUnitKMPH ? 1000 : 1609));
             bd = bd.setScale(2, RoundingMode.HALF_UP);
             return bd.doubleValue();
         } catch (Exception e) {
@@ -427,7 +446,7 @@ public class Act1 extends AppCompatActivity implements
             speedView.setTextColor(Color.GREEN);
             speedView.setSpeedTextColor(Color.GREEN);
             //   speedView.stop();
-            mTopSpd.setText("Top speed : " + convertMPStoKMPH(mSharedPreferences.getFloat("top_spd", 0)) + "km/h");
+            mTopSpd.setText("Top speed : " + convertMPStoKMPHOrMPH(mSharedPreferences.getFloat("top_spd", 0)) + (isUnitKMPH?"km/h":"MPH"));
             mLast_top_speed_time.setText("Reached on : " + getTime(mSharedPreferences.getLong("top_speed_last_time", 0)));
         } catch (Exception e) {
             e.printStackTrace();
@@ -445,7 +464,7 @@ public class Act1 extends AppCompatActivity implements
             speedView.setTextColor(Color.GREEN);
             speedView.setSpeedTextColor(Color.GREEN);
             //speedView.stop();
-            mTopSpd.setText("Top speed : " + convertMPStoKMPH(mSharedPreferences.getFloat("top_spd", 0)) + "km/h");
+            mTopSpd.setText("Top speed : " + convertMPStoKMPHOrMPH(mSharedPreferences.getFloat("top_spd", 0)) + (isUnitKMPH?"km/h":"MPH"));
             mLast_top_speed_time.setText("Reached on : " + getTime(mSharedPreferences.getLong("top_speed_last_time", 0)));
         } catch (Exception e) {
             e.printStackTrace();
@@ -464,7 +483,7 @@ public class Act1 extends AppCompatActivity implements
             speedView.setTextColor(Color.GREEN);
             speedView.setSpeedTextColor(Color.GREEN);
             //speedView.stop();
-            mTopSpd.setText("Top speed : " + convertMPStoKMPH(mSharedPreferences.getFloat("top_spd", 0)) + "km/h");
+            mTopSpd.setText("Top speed : " + convertMPStoKMPHOrMPH(mSharedPreferences.getFloat("top_spd", 0)) + (isUnitKMPH?"km/h":"MPH"));
             mLast_top_speed_time.setText("Reached on : " + getTime(mSharedPreferences.getLong("top_speed_last_time", 0)));
             showAd();
         } catch (Exception e) {
@@ -519,7 +538,7 @@ public class Act1 extends AppCompatActivity implements
             if (mLocationManager.getProvider(LocationManager.GPS_PROVIDER) != null) {
                 mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 1, Act1.this);
             }
-            showAd();
+//            showAd();
         } catch (Exception e) {
             e.printStackTrace();
         }
