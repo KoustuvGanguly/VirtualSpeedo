@@ -68,7 +68,7 @@ public class Act1 extends AppCompatActivity implements
     private SpeedView speedView;
     private AwesomeSpeedometer speedView_2;
     private TextView mDigitalSpeedView, km;
-    private SwitchCompat tgl_switch, tgl_switch_unit;
+    private SwitchCompat tgl_switch_unit;
     private boolean isTglEnabled = true, isUnitKMPH = true;
     private Button rwrd_btn;
     private GoogleApiClient googleApiClient;
@@ -82,6 +82,9 @@ public class Act1 extends AppCompatActivity implements
     private DrawerLayout dl;
     private ActionBarDrawerToggle t;
     private NavigationView nv;
+    private int speedoOn = 1;
+    Location mInitDistance = null;
+    private float mDistanceCovered = 0;
 
     @SuppressLint("MissingPermission")
     @Override
@@ -107,13 +110,21 @@ public class Act1 extends AppCompatActivity implements
                     int id = item.getItemId();
                     switch (id) {
                         case R.id.speedo_one:
-                            speedView.setVisibility(View.VISIBLE);
-                            speedView_2.setVisibility(View.GONE);
+                            mSharedPreferences.edit().putInt("speedo_on", 1).apply();
+                            speedoOn = mSharedPreferences.getInt("speedo_on", 1);
+                            setSpeedometerVisibility();
                             dl.closeDrawers();
                             break;
                         case R.id.speedo_two:
-                            speedView.setVisibility(View.GONE);
-                            speedView_2.setVisibility(View.VISIBLE);
+                            mSharedPreferences.edit().putInt("speedo_on", 2).apply();
+                            speedoOn = mSharedPreferences.getInt("speedo_on", 1);
+                            setSpeedometerVisibility();
+                            dl.closeDrawers();
+                            break;
+                        case R.id.speedo_3:
+                            mSharedPreferences.edit().putInt("speedo_on", 3).apply();
+                            speedoOn = mSharedPreferences.getInt("speedo_on", 1);
+                            setSpeedometerVisibility();
                             dl.closeDrawers();
                             break;
                         case R.id.settings:
@@ -154,6 +165,7 @@ public class Act1 extends AppCompatActivity implements
             mAltitude = (TextView) findViewById(R.id.altitude);
             mLast_top_speed_time = (TextView) findViewById(R.id.last_top_speed_time);
             mSharedPreferences = getSharedPreferences("speed_specs", Context.MODE_PRIVATE);
+
             try {
                 if (mLocationManager.getProvider(LocationManager.GPS_PROVIDER) != null) {
                     mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 1, Act1.this);
@@ -165,21 +177,17 @@ public class Act1 extends AppCompatActivity implements
                 Toast.makeText(Act1.this, "No GPS found!", Toast.LENGTH_SHORT).show();
                 e.printStackTrace();
             }
+            mDistanceCovered = mSharedPreferences.getFloat("distance_covered", 0);
             mAltitude.setText("Altitude : Searching...");
             ((TextView) findViewById(R.id.speed_accuracy)).setText("Speed accuracy : 0 m/s");
             ((TextView) findViewById(R.id.sat_count)).setText(0 + " Used In Last Fix (" + 0 + ")");
             mLast_top_speed_time.setText("Reached on : " + getTime(mSharedPreferences.getLong("top_speed_last_time", 0)));
             mTopSpd.setText("Top speed : " + convertMPStoKMPHOrMPH(mSharedPreferences.getFloat("top_spd", 0))
                     + (isUnitKMPH?"km/h":"MPH"));
+            ((TextView) findViewById(R.id.distance_covered))
+                    .setText("Distance covered : " + String.valueOf(convertMeterToKMOrMile(mDistanceCovered)) + (isUnitKMPH ? " km" : " Mile"));
             // mAltitude.setText("Limit crossed : " + String.valueOf(mSharedPreferences.getLong("spd_limit_crossed_times", 0)) + " times!");
-            tgl_switch = findViewById(R.id.tgl_switch);
             tgl_switch_unit = findViewById(R.id.tgl_switch_unit);
-            tgl_switch.setEnabled(isTglEnabled);
-            if (!isTglEnabled) {
-                ((TextView) findViewById(R.id.lbl1)).setTextColor(Color.GRAY);
-            } else {
-                ((TextView) findViewById(R.id.lbl1)).setTextColor(Color.GREEN);
-            }
             mDigitalSpeedView = findViewById(R.id.speed_digital_tv);
             km = findViewById(R.id.km);
             speedView = (SpeedView) findViewById(R.id.speed_tv_1);
@@ -197,28 +205,14 @@ public class Act1 extends AppCompatActivity implements
 //            BitmapFactory.
             mBuilder.setOngoing(false);
             notificationManager = NotificationManagerCompat.from(this);
-            tgl_switch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                    try {
-                        if (b) {
-                            mSharedPreferences.edit().putBoolean("switch_state", true).apply();
-                            speedView.setVisibility(View.GONE);
-                            speedView_2.setVisibility(View.GONE);
-                            mDigitalSpeedView.setVisibility(View.VISIBLE);
-                            km.setVisibility(View.VISIBLE);
-                        } else {
-                            mSharedPreferences.edit().putBoolean("switch_state", false).apply();
-                            speedView.setVisibility(View.VISIBLE);
-                            mDigitalSpeedView.setVisibility(View.GONE);
-                            km.setVisibility(View.GONE);
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
+            speedoOn = mSharedPreferences.getInt("speedo_on", 1);
+            if (mSharedPreferences.getBoolean("switch_state", false)) {
+                speedoOn = 3;
+                mSharedPreferences.edit().putInt("speedo_on", speedoOn).apply();
+                mSharedPreferences.edit().putBoolean("switch_state", false).apply();
 
+            }
+            setSpeedometerVisibility();
             tgl_switch_unit.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
@@ -226,15 +220,30 @@ public class Act1 extends AppCompatActivity implements
                         isUnitKMPH = !b;
                         mSharedPreferences.edit().putBoolean("unit_kmph", !b).apply();
                         speedView.setUnit(b ? "MPH" : "Km/h");
+                        speedView_2.setUnit(b ? "MPH" : "Km/h");
                         km.setText(b ? "MPH" : "Km/h");
                         mTopSpd.setText("Top speed : " + convertMPStoKMPHOrMPH(mSharedPreferences.getFloat("top_spd", 0))
                                 + (isUnitKMPH?"km/h":"MPH"));
+                        ((TextView) findViewById(R.id.distance_covered))
+                                .setText("Distance covered : " + String.valueOf(convertMeterToKMOrMile(mDistanceCovered)) + (isUnitKMPH ? " km" : " Mile"));
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
             });
-            tgl_switch.setChecked(mSharedPreferences.getBoolean("switch_state", false));
+            ((Button) findViewById(R.id.distance_reset)).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    try {
+                        mDistanceCovered = 0;
+                        mSharedPreferences.edit().putFloat("distance_covered", mDistanceCovered).apply();
+                        ((TextView) findViewById(R.id.distance_covered))
+                                .setText("Distance covered : " + String.valueOf(convertMeterToKMOrMile(mDistanceCovered)) + (isUnitKMPH ? " km" : " Mile"));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
             tgl_switch_unit.setChecked(!mSharedPreferences.getBoolean("unit_kmph", true));
             rwrd_btn.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -252,6 +261,7 @@ public class Act1 extends AppCompatActivity implements
             mAdView = (AdView) findViewById(R.id.adView);
             mInterstitialAd = new InterstitialAd(this);
             mInterstitialAd.setAdUnitId("ca-app-pub-3925957206744972/8325155655");
+
             mInterstitialAd.loadAd(buildAd());
             mAdView.loadAd(buildAd());
             mAdView.setAdListener(new AdListener() {
@@ -329,10 +339,8 @@ public class Act1 extends AppCompatActivity implements
                 @Override
                 public void onRewarded(RewardItem rewardItem) {
                     try {
-//                        isTglEnabled = true;
-//                        tgl_switch.setEnabled(isTglEnabled);
                         rwrd_btn.setVisibility(View.GONE);
-                        ((TextView) findViewById(R.id.lbl1)).setTextColor(Color.GREEN);
+                        //   ((TextView) findViewById(R.id.lbl1)).setTextColor(Color.GREEN);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -360,8 +368,28 @@ public class Act1 extends AppCompatActivity implements
         }
     }
 
-    private void setSpeedometer(){
+    private void setSpeedometerVisibility() {
+        switch (speedoOn) {
+            case 1:
+                speedView.setVisibility(View.VISIBLE);
+                speedView_2.setVisibility(View.GONE);
+                mDigitalSpeedView.setVisibility(View.GONE);
+                km.setVisibility(View.GONE);
+                break;
+            case 2:
+                speedView_2.setVisibility(View.VISIBLE);
+                speedView.setVisibility(View.GONE);
+                mDigitalSpeedView.setVisibility(View.GONE);
+                km.setVisibility(View.GONE);
+                break;
+            case 3:
+                speedView_2.setVisibility(View.GONE);
+                speedView.setVisibility(View.GONE);
+                mDigitalSpeedView.setVisibility(View.VISIBLE);
+                km.setVisibility(View.VISIBLE);
+                break;
 
+        }
     }
 
     @Override
@@ -374,11 +402,11 @@ public class Act1 extends AppCompatActivity implements
     }
     private void loadRewardedVideoAd() {
         mRewardedVideoAd.loadAd("ca-app-pub-3925957206744972/4329645292",
-                new AdRequest.Builder()/*.addTestDevice("5B92262A66C191C28146198B35A220B3")*/.build());
+                new AdRequest.Builder().addTestDevice("35ACB0CA10D03B177A1E01926D280D44").build());
     }
 
     private AdRequest buildAd() {
-        return new AdRequest.Builder()/*.addTestDevice("5B92262A66C191C28146198B35A220B3")*/.build();
+        return new AdRequest.Builder().addTestDevice("35ACB0CA10D03B177A1E01926D280D44").build();
     }
 
     private String getTime(long time) {
@@ -407,6 +435,15 @@ public class Act1 extends AppCompatActivity implements
                 bd = bd.setScale(2, RoundingMode.HALF_UP);
                 accuracy = bd.doubleValue();
                 ((TextView) findViewById(R.id.accuracy)).setText("Accuracy : " + accuracy + " meters");
+            }
+            if (mInitDistance == null) {
+                mInitDistance = location;
+            }
+            if (mInitDistance != null) {
+                mDistanceCovered += location.distanceTo(mInitDistance);
+                mSharedPreferences.edit().putFloat("distance_covered", mDistanceCovered).apply();
+                ((TextView) findViewById(R.id.distance_covered))
+                        .setText("Distance covered : " + String.valueOf(convertMeterToKMOrMile(mDistanceCovered)) + (isUnitKMPH ? " km" : " Mile"));
             }
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -521,6 +558,17 @@ public class Act1 extends AppCompatActivity implements
     private double convertMPStoKMPHOrMPH(float mps) {
         try {
             BigDecimal bd = new BigDecimal((mps * 3600) / (isUnitKMPH ? 1000 : 1609));
+            bd = bd.setScale(2, RoundingMode.HALF_UP);
+            return bd.doubleValue();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
+    private double convertMeterToKMOrMile(float meter) {
+        try {
+            BigDecimal bd = new BigDecimal((meter) / (isUnitKMPH ? 1000 : 1609));
             bd = bd.setScale(2, RoundingMode.HALF_UP);
             return bd.doubleValue();
         } catch (Exception e) {

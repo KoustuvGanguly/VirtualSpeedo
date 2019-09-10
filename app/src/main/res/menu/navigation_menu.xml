@@ -2,9 +2,11 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item android:id="@+id/speedo_one"
-        android:title="Default Speedometer"/>
+        android:title="Default"/>
     <item android:id="@+id/speedo_two"
-        android:title="Neon Speedometer"/>
+        android:title="Neon"/>
+    <item android:id="@+id/speedo_3"
+        android:title="Digital"/>
     <item android:id="@+id/settings"
         android:title="Settings"/>
     <item android:id="@+id/pp"
