@@ -6,10 +6,17 @@
     android:gravity="center"
     android:background="@color/colorPrimaryDark">
     <ImageView
-        android:layout_width="180dp"
-        android:layout_height="130dp"
-        android:layout_marginBottom="15dp"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
         android:layout_marginTop="15dp"
-        android:background="@drawable/common_full_open_on_phone"/>
+        android:src="@mipmap/ic_launcher"/>
+    <TextView
+        android:text="VS"
+        android:textSize="36dp"
+        android:textStyle="bold"
+        android:textAllCaps="true"
+        android:textColor="@color/colorAccent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
 
 </LinearLayout>

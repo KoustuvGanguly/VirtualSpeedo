@@ -8,9 +8,11 @@ import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.location.GpsSatellite;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -20,12 +22,10 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SwitchCompat;
-import android.support.v7.widget.Toolbar;
 import android.support.design.widget.NavigationView;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.TextView;
@@ -59,7 +59,8 @@ import java.util.Date;
 import java.util.Locale;
 
 public class Act1 extends AppCompatActivity implements
-        LocationListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+        LocationListener, GoogleApiClient.ConnectionCallbacks
+        , GoogleApiClient.OnConnectionFailedListener, android.location.GpsStatus.Listener {
     private final static int REQUEST_LOCATION = 46;
     private LocationManager mLocationManager;
     private TextView mTopSpd, mAltitude, mLast_top_speed_time;
@@ -105,17 +106,27 @@ public class Act1 extends AppCompatActivity implements
                 public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                     int id = item.getItemId();
                     switch (id) {
-                        case R.id.account:
+                        case R.id.speedo_one:
                             speedView.setVisibility(View.VISIBLE);
                             speedView_2.setVisibility(View.GONE);
+                            dl.closeDrawers();
+                            break;
+                        case R.id.speedo_two:
+                            speedView.setVisibility(View.GONE);
+                            speedView_2.setVisibility(View.VISIBLE);
+                            dl.closeDrawers();
                             break;
                         case R.id.settings:
                             Toast.makeText(Act1.this, "Settings", Toast.LENGTH_SHORT).show();
-                            speedView.setVisibility(View.GONE);
-                            speedView_2.setVisibility(View.VISIBLE);
+                            dl.closeDrawers();
                             break;
-                        case R.id.mycart:
-                            Toast.makeText(Act1.this, "My Cart", Toast.LENGTH_SHORT).show();
+                        case R.id.pp:
+                            try {
+                                startActivity(new Intent(Act1.this, Privacy.class));
+                                dl.closeDrawers();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
                             break;
                         default:
                             return true;
@@ -136,16 +147,7 @@ public class Act1 extends AppCompatActivity implements
             //layout.screenBrightness = 1;
             //getWindow().setAttributes(layout);
             mContext = this;
-            findViewById(R.id.pp).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    try {
-                        startActivity(new Intent(Act1.this, Privacy.class));
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
+
             mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
             rwrd_btn = findViewById(R.id.rwrd_btn);
             mTopSpd = (TextView) findViewById(R.id.top_speed_tv);
@@ -164,6 +166,8 @@ public class Act1 extends AppCompatActivity implements
                 e.printStackTrace();
             }
             mAltitude.setText("Altitude : Searching...");
+            ((TextView) findViewById(R.id.speed_accuracy)).setText("Speed accuracy : 0 m/s");
+            ((TextView) findViewById(R.id.sat_count)).setText(0 + " Used In Last Fix (" + 0 + ")");
             mLast_top_speed_time.setText("Reached on : " + getTime(mSharedPreferences.getLong("top_speed_last_time", 0)));
             mTopSpd.setText("Top speed : " + convertMPStoKMPH(mSharedPreferences.getFloat("top_spd", 0)) + "km/h");
             // mAltitude.setText("Limit crossed : " + String.valueOf(mSharedPreferences.getLong("spd_limit_crossed_times", 0)) + " times!");
@@ -337,6 +341,10 @@ public class Act1 extends AppCompatActivity implements
         }
     }
 
+    private void setSpeedometer(){
+
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
@@ -373,6 +381,24 @@ public class Act1 extends AppCompatActivity implements
                 mCurAlt = alt;
                 mAltitude.setText("Alt : " + alt + " meters");
             }
+
+            if (location.hasAccuracy()) {
+                double accuracy = 0.0;
+                BigDecimal bd = new BigDecimal(location.getAccuracy());
+                bd = bd.setScale(2, RoundingMode.HALF_UP);
+                accuracy = bd.doubleValue();
+                ((TextView) findViewById(R.id.accuracy)).setText("Accuracy : " + accuracy + " meters");
+            }
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                if (location.hasSpeedAccuracy()) {
+                    double speedAccuracy = 0.0;
+                    BigDecimal bd = new BigDecimal(location.getSpeedAccuracyMetersPerSecond());
+                    bd = bd.setScale(2, RoundingMode.HALF_UP);
+                    speedAccuracy = bd.doubleValue();
+                    ((TextView) findViewById(R.id.speed_accuracy)).setText("Speed accuracy : " + speedAccuracy + " m/s");
+                }
+            }
             if (location.hasSpeed()) {
                 if (convertMPStoKMPH(location.getSpeed()) >= speedView.getMaxSpeed()) {
                     speedView.setMaxSpeed(speedView.getMaxSpeed() + speedView.getMaxSpeed() / 2);
@@ -402,6 +428,7 @@ public class Act1 extends AppCompatActivity implements
                     mBuilder.setColor(Color.RED);
                 }
                 speedView.speedTo(mCurSpd);
+                speedView_2.speedTo(mCurSpd);
                 mDigitalSpeedView.setText(String.valueOf(mCurSpd));
                 runOnUiThread(new Runnable() {
                     @Override
@@ -435,6 +462,7 @@ public class Act1 extends AppCompatActivity implements
             } else {
                 try {
                     speedView.speedTo(0);
+                    speedView_2.speedTo(0);
                     mDigitalSpeedView.setText("0.0");
                     mDigitalSpeedView.setTextColor(Color.GREEN);
                     km.setTextColor(Color.GREEN);
@@ -489,6 +517,7 @@ public class Act1 extends AppCompatActivity implements
             mDigitalSpeedView.setTextColor(Color.GREEN);
             km.setTextColor(Color.GREEN);
             speedView.speedTo(0);
+            speedView_2.speedTo(0);
             speedView.setIndicatorColor(Color.GREEN);
             speedView.setTextColor(Color.GREEN);
             speedView.setSpeedTextColor(Color.GREEN);
@@ -507,6 +536,7 @@ public class Act1 extends AppCompatActivity implements
             mDigitalSpeedView.setTextColor(Color.GREEN);
             km.setTextColor(Color.GREEN);
             speedView.speedTo(0);
+            speedView_2.speedTo(0);
             speedView.setIndicatorColor(Color.GREEN);
             speedView.setTextColor(Color.GREEN);
             speedView.setSpeedTextColor(Color.GREEN);
@@ -526,6 +556,7 @@ public class Act1 extends AppCompatActivity implements
             mDigitalSpeedView.setTextColor(Color.GREEN);
             km.setTextColor(Color.GREEN);
             speedView.speedTo(0);
+            speedView_2.speedTo(0);
             speedView.setIndicatorColor(Color.GREEN);
             speedView.setTextColor(Color.GREEN);
             speedView.setSpeedTextColor(Color.GREEN);
@@ -683,5 +714,29 @@ public class Act1 extends AppCompatActivity implements
                 break;
         }
 
+    }
+
+    @SuppressLint("MissingPermission")
+    @Override
+    public void onGpsStatusChanged(int event) {
+        try {
+            int satellites = 0;
+            int satellitesInFix = 0;
+
+            int timetofix = mLocationManager.getGpsStatus(null).getTimeToFirstFix();
+            Log.i("VS", "Time to first fix = " + timetofix);
+            for (GpsSatellite sat : mLocationManager.getGpsStatus(null).getSatellites()) {
+                if (sat.usedInFix()) {
+                    satellitesInFix++;
+                }
+                satellites++;
+            }
+
+            ((TextView) findViewById(R.id.sat_count)).setText(satellites + " Used In Last Fix (" + satellitesInFix + ")");
+            Log.i("VS", satellites + " Used In Last Fix (" + satellitesInFix + ")");
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.e("VS", e.getMessage());
+        }
     }
 }
