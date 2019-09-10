@@ -29,16 +29,16 @@ public class SplashActivity extends AppCompatActivity {
             speedView.setMaxSpeed(300);
             speedView.setWithTremble(false);
             speedView.speedTo(1);
-            new CountDownTimer(4000, 10) {
+            new CountDownTimer(1000, 1) {
                 @Override
                 public void onTick(long l) {
                     try {
-                        if ((4000 - l) <= 2000) {
-                            speedView.speedTo(speedView.getSpeed() + 10);
+                        if ((1000 - l) <= 500) {
+                            speedView.speedTo(speedView.getSpeed() + 260);
                         } else {
-                            speedView.speedTo(speedView.getSpeed() - 10);
+                            speedView.speedTo(speedView.getSpeed() - 260);
                         }
-                        if (speedView.isInLowSection()) {
+                        /*if (speedView.isInLowSection()) {
                             speedView.setIndicatorColor(Color.GREEN);
                             speedView.setTextColor(Color.GREEN);
                             speedView.setSpeedTextColor(Color.GREEN);
@@ -50,7 +50,7 @@ public class SplashActivity extends AppCompatActivity {
                             speedView.setIndicatorColor(Color.RED);
                             speedView.setTextColor(Color.RED);
                             speedView.setSpeedTextColor(Color.RED);
-                        }
+                        }*/
                     } catch (Exception e) {
                         e.printStackTrace();
                     }

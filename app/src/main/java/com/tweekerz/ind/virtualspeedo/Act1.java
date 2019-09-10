@@ -16,9 +16,14 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SwitchCompat;
+import android.support.v7.widget.Toolbar;
+import android.support.design.widget.NavigationView;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -26,6 +31,7 @@ import android.widget.CompoundButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.github.anastr.speedviewlib.AwesomeSpeedometer;
 import com.github.anastr.speedviewlib.SpeedView;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
@@ -59,6 +65,7 @@ public class Act1 extends AppCompatActivity implements
     private TextView mTopSpd, mAltitude, mLast_top_speed_time;
     private SharedPreferences mSharedPreferences;
     private SpeedView speedView;
+    private AwesomeSpeedometer speedView_2;
     private TextView mDigitalSpeedView, km;
     private SwitchCompat tgl_switch;
     private boolean isTglEnabled = false;
@@ -71,7 +78,9 @@ public class Act1 extends AppCompatActivity implements
     private AdView mAdView;
     private InterstitialAd mInterstitialAd;
     private RewardedVideoAd mRewardedVideoAd;
-
+    private DrawerLayout dl;
+    private ActionBarDrawerToggle t;
+    private NavigationView nv;
 
     @SuppressLint("MissingPermission")
     @Override
@@ -79,9 +88,53 @@ public class Act1 extends AppCompatActivity implements
         try {
             super.onCreate(savedInstanceState);
             setContentView(R.layout.activity_act1);
-            WindowManager.LayoutParams layout = getWindow().getAttributes();
-            layout.screenBrightness = 1;
-            getWindow().setAttributes(layout);
+            dl = (DrawerLayout) findViewById(R.id.dl_main);
+            t = new ActionBarDrawerToggle(this, dl, R.string.navigation_drawer_open
+                    , R.string.navigation_drawer_close);
+            t.setDrawerIndicatorEnabled(true);
+
+            dl.addDrawerListener(t);
+            t.syncState();
+
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+
+            nv = (NavigationView) findViewById(R.id.nv);
+            nv.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+                @Override
+                public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                    int id = item.getItemId();
+                    switch (id) {
+                        case R.id.account:
+                            speedView.setVisibility(View.VISIBLE);
+                            speedView_2.setVisibility(View.GONE);
+                            break;
+                        case R.id.settings:
+                            Toast.makeText(Act1.this, "Settings", Toast.LENGTH_SHORT).show();
+                            speedView.setVisibility(View.GONE);
+                            speedView_2.setVisibility(View.VISIBLE);
+                            break;
+                        case R.id.mycart:
+                            Toast.makeText(Act1.this, "My Cart", Toast.LENGTH_SHORT).show();
+                            break;
+                        default:
+                            return true;
+                    }
+
+
+                    return true;
+
+                }
+            });
+//            setSupportActionBar(toolbar);
+
+//            final ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+//                    this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+//            drawer.addDrawerListener(toggle);
+//            toggle.syncState();
+            //WindowManager.LayoutParams layout = getWindow().getAttributes();
+            //layout.screenBrightness = 1;
+            //getWindow().setAttributes(layout);
             mContext = this;
             findViewById(R.id.pp).setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -123,9 +176,13 @@ public class Act1 extends AppCompatActivity implements
             }
             mDigitalSpeedView = findViewById(R.id.speed_digital_tv);
             km = findViewById(R.id.km);
-            speedView = (SpeedView) findViewById(R.id.speed_tv);
+            speedView = (SpeedView) findViewById(R.id.speed_tv_1);
             speedView.setMaxSpeed(300);
             speedView.setWithTremble(false);
+
+            speedView_2 = (AwesomeSpeedometer) findViewById(R.id.speed_tv_2);
+            speedView_2.setMaxSpeed(300);
+            speedView_2.setWithTremble(false);
             mBuilder = new NotificationCompat.Builder(mContext);
             //  mBuilder.setContentInfo("VS");
             mBuilder.setPriority(NotificationCompat.PRIORITY_MAX);
@@ -141,6 +198,7 @@ public class Act1 extends AppCompatActivity implements
                         if (b) {
                             mSharedPreferences.edit().putBoolean("switch_state", true).apply();
                             speedView.setVisibility(View.GONE);
+                            speedView_2.setVisibility(View.GONE);
                             mDigitalSpeedView.setVisibility(View.VISIBLE);
                             km.setVisibility(View.VISIBLE);
                         } else {
@@ -279,6 +337,14 @@ public class Act1 extends AppCompatActivity implements
         }
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        if (t.onOptionsItemSelected(item))
+            return true;
+
+        return super.onOptionsItemSelected(item);
+    }
     private void loadRewardedVideoAd() {
         mRewardedVideoAd.loadAd("ca-app-pub-3925957206744972/4329645292",
                 new AdRequest.Builder()/*.addTestDevice("5B92262A66C191C28146198B35A220B3")*/.build());
