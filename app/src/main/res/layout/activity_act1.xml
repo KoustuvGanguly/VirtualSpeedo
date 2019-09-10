@@ -5,11 +5,82 @@
     android:id="@+id/dl_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#000"
+    android:paddingTop="5dp"
     tools:context="com.tweekerz.ind.virtualspeedo.Act1">
 
     <RelativeLayout
         android:id="@+id/rl1"
         android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="5dp"
+        android:gravity="left"
+        android:text="Privacy Policy"
+        android:textColor="#fff"
+        android:textSize="18dp" />
+
+    <Button
+        android:id="@+id/rwrd_btn"
+        android:layout_width="match_parent"
+        android:layout_height="20dp"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/lbl1"
+        android:layout_marginTop="2dp"
+        android:background="#00f"
+        android:enabled="false"
+        android:gravity="center"
+        android:text="Unlock digital speedometer for this session"
+        android:textColor="#fff"
+        android:textSize="10dp"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/lbl1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toLeftOf="@+id/tgl_switch"
+        android:padding="5dp"
+        android:text="Analog/Digital"
+        android:textColor="#00ff00"
+        android:textSize="18dp" />
+
+    <android.support.v7.widget.SwitchCompat
+        android:id="@+id/tgl_switch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:enabled="true"
+        android:padding="5dp"
+        android:textSize="18dp"
+        app:thumbTint="#0ff"
+        app:trackTint="#73f" />
+
+    <TextView
+        android:id="@+id/lbl2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/tgl_switch_unit"
+        android:layout_toLeftOf="@+id/tgl_switch_unit"
+        android:padding="5dp"
+        android:text="KMPH/MPH"
+        android:textColor="#00ff00"
+        android:textSize="18dp" />
+
+    <android.support.v7.widget.SwitchCompat
+        android:id="@+id/tgl_switch_unit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/tgl_switch"
+        android:enabled="true"
+        android:padding="5dp"
+        android:textSize="18dp"
+        app:thumbTint="#0ff"
+        app:trackTint="#73f" />
         android:layout_height="match_parent"
         android:background="#000"
         android:orientation="vertical">
@@ -51,6 +122,22 @@
             app:thumbTint="#0ff"
             app:trackTint="#73f" />
 
+    <TextView
+        android:id="@+id/altitude"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/pp"
+        android:layout_marginTop="26dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginStart="10dp"
+        android:gravity="center"
+        android:text="0fffffffffffffffffffffff"
+        android:textColor="#fff"
+        android:textSize="25sp"
+        android:textStyle="bold"
+        android:visibility="visible" />
         <TextView
             android:id="@+id/altitude"
             android:layout_width="wrap_content"
@@ -113,6 +200,25 @@
             android:gravity="center"
             android:orientation="vertical">
 
+        <TextView
+            android:id="@+id/speed_digital_tv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="0.0"
+            android:textColor="#00ff00"
+            android:textSize="120sp"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/km"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Km/h"
+            android:textColor="#00ff00"
+            android:textSize="40sp"
+            android:visibility="gone" />
             <TextView
                 android:id="@+id/speed_digital_tv"
                 android:layout_width="match_parent"
@@ -190,6 +296,26 @@
             android:textSize="25sp"
             android:textStyle="bold" />
 
+    <TextView
+        android:id="@+id/last_top_speed_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/adView"
+        android:layout_centerInParent="true"
+        android:text="01-01-1970 05:30:00"
+        android:textColor="#fff"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+
+    <com.google.android.gms.ads.AdView xmlns:ads="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/adView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        ads:adSize="SMART_BANNER"
+        ads:adUnitId="ca-app-pub-3925957206744972/5904204585" />
+</RelativeLayout>
         <TextView
             android:id="@+id/last_top_speed_time"
             android:layout_width="wrap_content"
