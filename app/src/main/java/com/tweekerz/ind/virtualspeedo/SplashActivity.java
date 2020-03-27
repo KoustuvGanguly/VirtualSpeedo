@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
+import android.os.Looper;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.WindowManager;
@@ -28,29 +29,32 @@ public class SplashActivity extends AppCompatActivity {
             final SpeedView speedView = (SpeedView) findViewById(R.id.speed_tv_spl);
             speedView.setMaxSpeed(300);
             speedView.setWithTremble(false);
-            speedView.speedTo(1);
-            new CountDownTimer(4000, 10) {
+
+
+
+            new CountDownTimer(800, 1) {
                 @Override
                 public void onTick(long l) {
                     try {
-                        if ((4000 - l) <= 2000) {
-                            speedView.speedTo(speedView.getSpeed() + 10);
+                        speedView.speedTo(Integer.valueOf(String.valueOf(l)),700);
+                        /*if ((1000 - l) <= 500) {
+
                         } else {
-                            speedView.speedTo(speedView.getSpeed() - 10);
-                        }
-                        if (speedView.isInLowSection()) {
-                            speedView.setIndicatorColor(Color.GREEN);
-                            speedView.setTextColor(Color.GREEN);
-                            speedView.setSpeedTextColor(Color.GREEN);
-                        } else if (speedView.isInMediumSection()) {
-                            speedView.setIndicatorColor(Color.YELLOW);
-                            speedView.setTextColor(Color.YELLOW);
-                            speedView.setSpeedTextColor(Color.YELLOW);
-                        } else {
-                            speedView.setIndicatorColor(Color.RED);
-                            speedView.setTextColor(Color.RED);
-                            speedView.setSpeedTextColor(Color.RED);
-                        }
+                            speedView.speedTo(speedView.getSpeed() - 360);
+                        }*/
+                            /*if (speedView.isInLowSection()) {
+                                speedView.setIndicatorColor(Color.GREEN);
+                                speedView.setTextColor(Color.GREEN);
+                                speedView.setSpeedTextColor(Color.GREEN);
+                            } else if (speedView.isInMediumSection()) {
+                                speedView.setIndicatorColor(Color.YELLOW);
+                                speedView.setTextColor(Color.YELLOW);
+                                speedView.setSpeedTextColor(Color.YELLOW);
+                            } else {
+                                speedView.setIndicatorColor(Color.RED);
+                                speedView.setTextColor(Color.RED);
+                                speedView.setSpeedTextColor(Color.RED);
+                            }*/
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -60,25 +64,40 @@ public class SplashActivity extends AppCompatActivity {
                 @Override
                 public void onFinish() {
                     try {
-                        if (ActivityCompat.checkSelfPermission(SplashActivity.this
-                                , Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                                && ActivityCompat.checkSelfPermission(SplashActivity.this
-                                , Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                            ActivityCompat.requestPermissions(SplashActivity.this
-                                    , new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1); // 1 is a integer which will return the result in onRequestPermissionsResult
-                        } else {
-                            locationGranted = true;
-                        }
-                        if (locationGranted) {
-                            startActivity(new Intent(SplashActivity.this, Act1.class));
-                            finish();
-                            overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
-                        }
+                        new Thread() {
+                            @Override
+                            public void run() {
+                                super.run();
+
+                                try {
+                                   // speedView.speedTo(0);
+                                    if (ActivityCompat.checkSelfPermission(SplashActivity.this
+                                            , Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                                            && ActivityCompat.checkSelfPermission(SplashActivity.this
+                                            , Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                                        ActivityCompat.requestPermissions(SplashActivity.this
+                                                , new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1); // 1 is a integer which will return the result in onRequestPermissionsResult
+                                    } else {
+                                        locationGranted = true;
+                                    }
+                                    if (locationGranted) {
+                                        startActivity(new Intent(SplashActivity.this, Act1.class));
+                                        finish();
+                                        overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
+                                    }
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }.start();
+
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
             }.start();
+
+
         } catch (Exception e) {
             e.printStackTrace();
         }

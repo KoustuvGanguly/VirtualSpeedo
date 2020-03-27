@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:id="@+id/speedo_one"
+        android:title="Default"/>
+    <item android:id="@+id/speedo_two"
+        android:title="Neon"/>
+    <item android:id="@+id/speedo_3"
+        android:title="Digital"/>
+    <item android:id="@+id/settings"
+        android:title="Settings"/>
+    <item android:id="@+id/pp"
+        android:title="Privacy policy"/>
+
+</menu>
